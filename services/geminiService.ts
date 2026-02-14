@@ -4,14 +4,16 @@ import { SYSTEM_INSTRUCTIONS } from "../constants.tsx";
 
 export class GeminiService {
   private getAI() {
-    return new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    // Correctly using process.env.API_KEY as a named parameter.
+    return new GoogleGenAI({ apiKey: process.env.API_KEY as string });
   }
 
   async analyzeAdmissions(prompt: string, contextData?: string) {
     const ai = this.getAI();
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-lite-latest",
+        // Updated model to gemini-3-flash-preview as per task type recommendations.
+        model: "gemini-3-flash-preview",
         contents: [
           {
             role: 'user',
@@ -43,6 +45,7 @@ export class GeminiService {
       contents: [{ role: 'user', parts: [{ text: prompt }, { text: `DATA:\n${dataBlob}` }] }],
       config: {
         systemInstruction: SYSTEM_INSTRUCTIONS,
+        // Using thinkingBudget with gemini-3-pro-preview as permitted.
         thinkingConfig: { thinkingBudget: 4000 }
       }
     });
