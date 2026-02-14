@@ -1,0 +1,8 @@
+{
+  "name": "Copy of Copy of DAAP - Darshan Admissions Analysis Portal",
+  "description": "Enterprise-grade Strategic Enrollment & Admissions Intelligence Platform for school leadership, providing data-backed diagnostics and ROI analysis.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
