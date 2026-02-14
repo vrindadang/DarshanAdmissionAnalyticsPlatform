@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Icons } from '../constants';
-import { Message, AdmissionFile } from '../types';
-import { gemini } from '../services/geminiService';
+import { Icons } from '../constants.tsx';
+import { Message, AdmissionFile } from '../types.ts';
+import { gemini } from '../services/geminiService.ts';
 
 const AIAgent: React.FC<{ files: AdmissionFile[] }> = ({ files }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,7 +49,17 @@ const AIAgent: React.FC<{ files: AdmissionFile[] }> = ({ files }) => {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return (
+      <button 
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-10 right-10 w-16 h-16 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-blue-700 hover:scale-110 transition-all z-50 group"
+      >
+        <Icons.Bot />
+        <span className="absolute right-full mr-4 px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">DAAP Core Active</span>
+      </button>
+    );
+  }
 
   return (
     <div className="fixed bottom-28 right-10 w-[420px] h-[640px] bg-white border border-slate-200 rounded-[3rem] shadow-2xl flex flex-col z-[60] overflow-hidden animate-in slide-in-from-bottom-6 duration-300">

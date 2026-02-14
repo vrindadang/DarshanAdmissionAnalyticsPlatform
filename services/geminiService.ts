@@ -1,6 +1,6 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { SYSTEM_INSTRUCTIONS } from "../constants";
+import { SYSTEM_INSTRUCTIONS } from "../constants.tsx";
 
 export class GeminiService {
   private getAI() {

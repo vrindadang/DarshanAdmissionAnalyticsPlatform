@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { AdmissionFile } from './types';
-import Dashboard from './components/Dashboard';
-import Login from './components/Login';
-import AIAgent from './components/AIAgent';
-import CampusNetwork from './components/CampusNetwork';
-import CampusDetail from './components/CampusDetail';
+import { AdmissionFile } from './types.ts';
+import Dashboard from './components/Dashboard.tsx';
+import Login from './components/Login.tsx';
+import AIAgent from './components/AIAgent.tsx';
+import CampusNetwork from './components/CampusNetwork.tsx';
+import CampusDetail from './components/CampusDetail.tsx';
 
 const CAMPUS_LIST = [
   'Darshan Academy 5th Mile',
