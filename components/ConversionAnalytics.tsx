@@ -148,8 +148,8 @@ const ConversionAnalytics: React.FC = () => {
                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
                     itemStyle={{ fontSize: '11px', fontWeight: 800 }}
                   />
-                  <Area type="monotone" dataKey="enquiries" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorEnq)" />
-                  <Area type="monotone" dataKey="registration" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorReg)" />
+                  <Area type="monotone" dataKey="enquiries" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorEnq)" label={{ position: 'top', fontSize: 9, fontWeight: 800, fill: '#3b82f6' }} />
+                  <Area type="monotone" dataKey="registration" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorReg)" label={{ position: 'top', fontSize: 9, fontWeight: 800, fill: '#10b981' }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -210,7 +210,7 @@ const ConversionAnalytics: React.FC = () => {
                   contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
                   formatter={(value: number) => [`${value.toFixed(1)}%`, 'Yield']}
                 />
-                <Bar dataKey="conversionRate" radius={[0, 6, 6, 0]} barSize={20} name="Yield %">
+                <Bar dataKey="conversionRate" radius={[0, 6, 6, 0]} barSize={20} name="Yield %" label={{ position: 'right', fontSize: 9, fontWeight: 800, fill: '#64748b', formatter: (val: number) => `${val.toFixed(1)}%` }}>
                   {campusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.conversionRate > 50 ? '#10b981' : entry.conversionRate > 25 ? '#3b82f6' : '#f43f5e'} />
                   ))}

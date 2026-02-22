@@ -27,7 +27,7 @@ const TargetAnalysis: React.FC = () => {
   const [campusPerformance, setCampusPerformance] = useState<CampusPerformance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const years = ['2023-2024', '2024-2025', '2025-2026', '2026-2027'];
+  const years = ['2023-2024', '2024-2025', '2025-2026', '2026-2027', 'Overall'];
 
   useEffect(() => {
     fetchTargetMetrics();
@@ -48,7 +48,6 @@ const TargetAnalysis: React.FC = () => {
         const yearGroups: Record<string, { adm: number, tgt: number }> = {};
         data.forEach(row => {
           const yr = row.session_year.includes('20') ? row.session_year : `20${row.session_year.split('-')[0]}-20${row.session_year.split('-')[1]}`;
-          // Fix: Initializing the entry with correct property names 'adm' and 'tgt' as per the Record definition.
           if (!yearGroups[yr]) yearGroups[yr] = { adm: 0, tgt: 0 };
           yearGroups[yr].adm += (row.admission || 0);
           yearGroups[yr].tgt += (row.target || 0);
@@ -63,16 +62,18 @@ const TargetAnalysis: React.FC = () => {
         setNetworkTrends(formattedTrends);
 
         // Campus-Specific Performance for active year
-        const shortYear = activeYear.replace(/-20(\d\d)$/, '-$1');
-        const yearFiltered = data.filter(d => d.session_year === activeYear || d.session_year === shortYear);
-        
-        const formattedCampuses = yearFiltered.map(d => ({
-          name: d.campus_name,
-          admission: d.admission || 0,
-          target: d.target || 0,
-          achievement: d.target > 0 ? (d.admission / d.target) * 100 : 0
-        })).sort((a, b) => b.achievement - a.achievement);
-        setCampusPerformance(formattedCampuses);
+        if (activeYear !== 'Overall') {
+          const shortYear = activeYear.replace(/-20(\d\d)$/, '-$1');
+          const yearFiltered = data.filter(d => d.session_year === activeYear || d.session_year === shortYear);
+          
+          const formattedCampuses = yearFiltered.map(d => ({
+            name: d.campus_name,
+            admission: d.admission || 0,
+            target: d.target || 0,
+            achievement: d.target > 0 ? (d.admission / d.target) * 100 : 0
+          })).sort((a, b) => b.achievement - a.achievement);
+          setCampusPerformance(formattedCampuses);
+        }
       }
     } catch (err) {
       console.error("Target Analysis Fetch Error:", err);
@@ -111,139 +112,147 @@ const TargetAnalysis: React.FC = () => {
       </div>
 
       {/* Network Overview Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-         <MetricSummaryCard 
-            label="Total Admissions" 
-            value={campusPerformance.reduce((a, b) => a + b.admission, 0).toLocaleString()} 
-            subLabel="Network Current"
-         />
-         <MetricSummaryCard 
-            label="Global Target" 
-            value={campusPerformance.reduce((a, b) => a + b.target, 0).toLocaleString()} 
-            subLabel="Session Threshold"
-         />
-         <MetricSummaryCard 
-            label="Deficit / Surplus" 
-            value={(campusPerformance.reduce((a, b) => a + b.admission, 0) - campusPerformance.reduce((a, b) => a + b.target, 0)).toLocaleString()} 
-            subLabel="Operational Gap"
-            variant="highlight"
-         />
-         <MetricSummaryCard 
-            label="Achievement" 
-            value={`${(campusPerformance.reduce((a, b) => a + b.target, 0) > 0 ? (campusPerformance.reduce((a, b) => a + b.admission, 0) / campusPerformance.reduce((a, b) => a + b.target, 0)) * 100 : 0).toFixed(1)}%`} 
-            subLabel="Strategic Velocity"
-         />
-      </div>
+      {activeYear !== 'Overall' && (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <MetricSummaryCard 
+              label="Total Admissions" 
+              value={campusPerformance.reduce((a, b) => a + b.admission, 0).toLocaleString()} 
+              subLabel="Network Current"
+          />
+          <MetricSummaryCard 
+              label="Global Target" 
+              value={campusPerformance.reduce((a, b) => a + b.target, 0).toLocaleString()} 
+              subLabel="Session Threshold"
+          />
+          <MetricSummaryCard 
+              label="Deficit / Surplus" 
+              value={(campusPerformance.reduce((a, b) => a + b.admission, 0) - campusPerformance.reduce((a, b) => a + b.target, 0)).toLocaleString()} 
+              subLabel="Operational Gap"
+              variant="highlight"
+          />
+          <MetricSummaryCard 
+              label="Achievement" 
+              value={`${(campusPerformance.reduce((a, b) => a + b.target, 0) > 0 ? (campusPerformance.reduce((a, b) => a + b.admission, 0) / campusPerformance.reduce((a, b) => a + b.target, 0)) * 100 : 0).toFixed(1)}%`} 
+              subLabel="Strategic Velocity"
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Trend Analysis */}
-        <div className="bg-white rounded-[3rem] border border-slate-200 p-12 shadow-sm">
-          <div className="mb-10">
-            <h3 className="text-xl font-black text-slate-900">Historical Target Trends</h3>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Enrollment vs Projected Capacity</p>
+        {activeYear === 'Overall' && (
+          <div className="lg:col-span-2 bg-white rounded-[3rem] border border-slate-200 p-12 shadow-sm">
+            <div className="mb-10">
+              <h3 className="text-xl font-black text-slate-900">Historical Target Trends</h3>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Enrollment vs Projected Capacity</p>
+            </div>
+            <div className="h-[360px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={networkTrends} margin={{ right: 50, top: 20, left: 10 }}>
+                  <defs>
+                    <linearGradient id="colorAdm" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid vertical={false} stroke="#f1f5f9" strokeDasharray="3 3" />
+                  <XAxis dataKey="year" axisLine={false} tickLine={false} fontSize={10} fontWeight={800} stroke="#94a3b8" dy={10} />
+                  <YAxis axisLine={false} tickLine={false} fontSize={10} fontWeight={700} stroke="#94a3b8" />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
+                    itemStyle={{ fontSize: '11px', fontWeight: 800 }}
+                  />
+                  <Area type="monotone" dataKey="target" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" fill="none" name="Projected Target" label={{ position: 'top', fontSize: 9, fontWeight: 800, fill: '#94a3b8' }} />
+                  <Area type="monotone" dataKey="admission" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorAdm)" name="Actual Admissions" label={{ position: 'top', fontSize: 9, fontWeight: 800, fill: '#10b981' }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="h-[360px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={networkTrends}>
-                <defs>
-                  <linearGradient id="colorAdm" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid vertical={false} stroke="#f1f5f9" strokeDasharray="3 3" />
-                <XAxis dataKey="year" axisLine={false} tickLine={false} fontSize={10} fontWeight={800} stroke="#94a3b8" dy={10} />
-                <YAxis axisLine={false} tickLine={false} fontSize={10} fontWeight={700} stroke="#94a3b8" />
-                <Tooltip 
-                   contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
-                   itemStyle={{ fontSize: '11px', fontWeight: 800 }}
-                />
-                <Area type="monotone" dataKey="target" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" fill="none" name="Projected Target" />
-                <Area type="monotone" dataKey="admission" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorAdm)" name="Actual Admissions" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        )}
 
         {/* Efficiency Chart - Transposed for multi-campus clarity */}
-        <div className="bg-white rounded-[3rem] border border-slate-200 p-12 shadow-sm">
-          <div className="mb-10">
-            <h3 className="text-xl font-black text-slate-900">Campus Benchmark Distribution</h3>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Goal Achievement Ranking {activeYear}</p>
+        {activeYear !== 'Overall' && (
+          <div className="lg:col-span-2 bg-white rounded-[3rem] border border-slate-200 p-12 shadow-sm">
+            <div className="mb-10">
+              <h3 className="text-xl font-black text-slate-900">Campus Benchmark Distribution</h3>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Goal Achievement Ranking {activeYear}</p>
+            </div>
+            <div className="h-[360px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart layout="vertical" data={campusPerformance} margin={{ left: 140, right: 40 }}>
+                  <CartesianGrid horizontal={false} stroke="#f1f5f9" strokeDasharray="3 3" />
+                  <XAxis type="number" axisLine={false} tickLine={false} fontSize={10} fontWeight={800} stroke="#94a3b8" />
+                  <YAxis 
+                    dataKey="name" 
+                    type="category" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    fontSize={10} 
+                    fontWeight={800} 
+                    stroke="#64748b" 
+                    width={140}
+                    tickFormatter={(value) => value.replace('Darshan Academy ', '')}
+                  />
+                  <Tooltip 
+                    cursor={{ fill: 'rgba(0,0,0,0.02)' }} 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
+                    formatter={(value: number) => [`${value.toFixed(1)}%`, 'Achievement']}
+                  />
+                  <Bar dataKey="achievement" radius={[0, 4, 4, 0]} barSize={12} name="Achievement %" label={{ position: 'right', fontSize: 9, fontWeight: 800, fill: '#64748b', formatter: (val: number) => `${val.toFixed(1)}%` }}>
+                    {campusPerformance.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={getAchievementColor(entry.achievement)} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="h-[360px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={campusPerformance} margin={{ left: 140, right: 40 }}>
-                <CartesianGrid horizontal={false} stroke="#f1f5f9" strokeDasharray="3 3" />
-                <XAxis type="number" axisLine={false} tickLine={false} fontSize={10} fontWeight={800} stroke="#94a3b8" />
-                <YAxis 
-                   dataKey="name" 
-                   type="category" 
-                   axisLine={false} 
-                   tickLine={false} 
-                   fontSize={10} 
-                   fontWeight={800} 
-                   stroke="#64748b" 
-                   width={140}
-                   tickFormatter={(value) => value.replace('Darshan Academy ', '')}
-                />
-                <Tooltip 
-                  cursor={{ fill: 'rgba(0,0,0,0.02)' }} 
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}
-                  formatter={(value: number) => [`${value.toFixed(1)}%`, 'Achievement']}
-                />
-                <Bar dataKey="achievement" radius={[0, 4, 4, 0]} barSize={12} name="Achievement %">
-                  {campusPerformance.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getAchievementColor(entry.achievement)} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Comparison Grid Table */}
-      <div className="bg-white rounded-[3rem] border border-slate-200 overflow-hidden shadow-sm">
-        <div className="px-12 py-8 border-b border-slate-100 flex items-center justify-between">
-           <div>
-              <h3 className="text-lg font-black text-slate-900">Global Seat Utilization Audit</h3>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Campus-Level Capacity Diagnostic</p>
-           </div>
+      {activeYear !== 'Overall' && (
+        <div className="bg-white rounded-[3rem] border border-slate-200 overflow-hidden shadow-sm">
+          <div className="px-12 py-8 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h3 className="text-lg font-black text-slate-900">Global Seat Utilization Audit</h3>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Campus-Level Capacity Diagnostic</p>
+            </div>
+          </div>
+          <table className="w-full text-left border-collapse">
+            <thead>
+                <tr className="bg-slate-50/50">
+                  <th className="px-12 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">INSTITUTION NODE</th>
+                  <th className="px-12 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">TARGET LOAD</th>
+                  <th className="px-12 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">ACTUAL YIELD</th>
+                  <th className="px-12 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">STRATEGIC INDEX</th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+                {campusPerformance.map((campus, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50/80 transition-colors group">
+                      <td className="px-12 py-5 font-bold text-sm text-slate-900">{campus.name.replace('Darshan Academy ', '')}</td>
+                      <td className="px-12 py-5 text-sm font-semibold text-slate-400">{campus.target}</td>
+                      <td className="px-12 py-5 text-sm font-black text-slate-700">{campus.admission}</td>
+                      <td className="px-12 py-5">
+                        <div className="flex items-center gap-4">
+                            <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden w-32">
+                              <div 
+                                  className="h-full rounded-full transition-all duration-1000" 
+                                  style={{ width: `${Math.min(campus.achievement, 100)}%`, backgroundColor: getAchievementColor(campus.achievement) }}
+                              />
+                            </div>
+                            <span className="text-[11px] font-black tabular-nums" style={{ color: getAchievementColor(campus.achievement) }}>
+                              {campus.achievement.toFixed(1)}%
+                            </span>
+                        </div>
+                      </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </div>
-        <table className="w-full text-left border-collapse">
-           <thead>
-              <tr className="bg-slate-50/50">
-                 <th className="px-12 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">INSTITUTION NODE</th>
-                 <th className="px-12 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">TARGET LOAD</th>
-                 <th className="px-12 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">ACTUAL YIELD</th>
-                 <th className="px-12 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">STRATEGIC INDEX</th>
-              </tr>
-           </thead>
-           <tbody className="divide-y divide-slate-50">
-              {campusPerformance.map((campus, idx) => (
-                 <tr key={idx} className="hover:bg-slate-50/80 transition-colors group">
-                    <td className="px-12 py-5 font-bold text-sm text-slate-900">{campus.name.replace('Darshan Academy ', '')}</td>
-                    <td className="px-12 py-5 text-sm font-semibold text-slate-400">{campus.target}</td>
-                    <td className="px-12 py-5 text-sm font-black text-slate-700">{campus.admission}</td>
-                    <td className="px-12 py-5">
-                       <div className="flex items-center gap-4">
-                          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden w-32">
-                             <div 
-                                className="h-full rounded-full transition-all duration-1000" 
-                                style={{ width: `${Math.min(campus.achievement, 100)}%`, backgroundColor: getAchievementColor(campus.achievement) }}
-                             />
-                          </div>
-                          <span className="text-[11px] font-black tabular-nums" style={{ color: getAchievementColor(campus.achievement) }}>
-                             {campus.achievement.toFixed(1)}%
-                          </span>
-                       </div>
-                    </td>
-                 </tr>
-              ))}
-           </tbody>
-        </table>
-      </div>
+      )}
 
       {isLoading && (
         <div className="fixed inset-0 bg-slate-50/50 backdrop-blur-sm z-[100] flex items-center justify-center">

@@ -79,9 +79,9 @@ const SchoolAnalytics: React.FC<SchoolAnalyticsProps> = ({ selectedBranch, files
                   contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
                 />
                 <Legend />
-                <Bar dataKey="North" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="South" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Global" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="North" fill="#3b82f6" radius={[4, 4, 0, 0]} label={{ position: 'top', fontSize: 10, fontWeight: 800, fill: '#3b82f6' }} />
+                <Bar dataKey="South" fill="#f59e0b" radius={[4, 4, 0, 0]} label={{ position: 'top', fontSize: 10, fontWeight: 800, fill: '#f59e0b' }} />
+                <Bar dataKey="Global" fill="#10b981" radius={[4, 4, 0, 0]} label={{ position: 'top', fontSize: 10, fontWeight: 800, fill: '#10b981' }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -99,7 +99,7 @@ const SchoolAnalytics: React.FC<SchoolAnalyticsProps> = ({ selectedBranch, files
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
                 />
-                <Line type="monotone" dataKey="enrollment" stroke="#3b82f6" strokeWidth={3} dot={{ r: 6, fill: '#3b82f6' }} activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="enrollment" stroke="#3b82f6" strokeWidth={3} dot={{ r: 6, fill: '#3b82f6' }} activeDot={{ r: 8 }} label={{ position: 'top', fontSize: 10, fontWeight: 800, fill: '#3b82f6', dy: -10 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>

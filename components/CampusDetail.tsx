@@ -319,7 +319,7 @@ const CampusDetail: React.FC<CampusDetailProps> = ({ campusName, activeTab, onBa
                                 <XAxis dataKey="metric" axisLine={false} tickLine={false} fontSize={8} fontWeight={800} dy={10} stroke="#94a3b8" />
                                 <YAxis axisLine={false} tickLine={false} fontSize={9} fontWeight={700} stroke="#94a3b8" />
                                 <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                                {cls.sessions.map((s, sIdx) => (<Bar key={s.year} dataKey={s.year} fill={SESSION_COLORS[sIdx % SESSION_COLORS.length]} radius={[2, 2, 0, 0]} barSize={16} />))}
+                                {cls.sessions.map((s, sIdx) => (<Bar key={s.year} dataKey={s.year} fill={SESSION_COLORS[sIdx % SESSION_COLORS.length]} radius={[2, 2, 0, 0]} barSize={16} label={{ position: 'top', fontSize: 8, fontWeight: 800, fill: '#64748b' }} />))}
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
